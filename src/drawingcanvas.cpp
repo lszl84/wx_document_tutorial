@@ -18,14 +18,35 @@ DrawingCanvas::DrawingCanvas(wxWindow *parent, DrawingView *view, wxWindowID id,
     this->Bind(wxEVT_CONTEXT_MENU, &DrawingCanvas::OnContextMenuEvent, this);
 }
 
-void DrawingCanvas::OnPaint(wxPaintEvent &)
+void DrawingCanvas::BuildContextMenu()
 {
-    wxAutoBufferedPaintDC dc(this);
+    auto clear = contextMenu.Append(wxID_ANY, "&Clear");
+    auto save = contextMenu.Append(wxID_ANY, "&Export...");
 
-    if (view)
-    {
-        view->OnDraw(&dc);
-    }
+    this->Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent &)
+        {
+            this->view->OnClear();
+            this->Refresh();
+        },
+        clear->GetId());
+
+    this->Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent &)
+        {
+            this->ShowExportDialog();
+        },
+        save->GetId());
+}
+
+void DrawingCanvas::OnContextMenuEvent(wxContextMenuEvent &e)
+{
+    auto clientPos = e.GetPosition() == wxDefaultPosition
+                         ? wxPoint(this->GetSize().GetWidth() / 2, this->GetSize().GetHeight() / 2)
+                         : this->ScreenToClient(e.GetPosition());
+    PopupMenu(&this->contextMenu, clientPos);
 }
 
 void DrawingCanvas::ShowExportDialog()
@@ -85,39 +106,18 @@ void DrawingCanvas::OnMouseLeave(wxMouseEvent &)
     }
 }
 
+void DrawingCanvas::OnPaint(wxPaintEvent &)
+{
+    wxAutoBufferedPaintDC dc(this);
+
+    if (view)
+    {
+        view->OnDraw(&dc);
+    }
+}
+
 void DrawingCanvas::SetView(DrawingView *view)
 {
     this->view = view;
     Refresh();
-}
-
-void DrawingCanvas::BuildContextMenu()
-{
-    auto clear = contextMenu.Append(wxID_ANY, "&Clear");
-    auto save = contextMenu.Append(wxID_ANY, "&Export...");
-
-    this->Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent &)
-        {
-            this->view->OnClear();
-            this->Refresh();
-        },
-        clear->GetId());
-
-    this->Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent &)
-        {
-            this->ShowExportDialog();
-        },
-        save->GetId());
-}
-
-void DrawingCanvas::OnContextMenuEvent(wxContextMenuEvent &e)
-{
-    auto clientPos = e.GetPosition() == wxDefaultPosition
-                         ? wxPoint(this->GetSize().GetWidth() / 2, this->GetSize().GetHeight() / 2)
-                         : this->ScreenToClient(e.GetPosition());
-    PopupMenu(&this->contextMenu, clientPos);
 }
