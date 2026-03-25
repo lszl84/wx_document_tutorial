@@ -24,5 +24,5 @@ If you don't have wxWidgets installed, the CMake script will download and build 
 But if CMake script finds wxWidgets on your system, make sure it's at least version 3.1.0.
 
 ---
-Check out the blog for more! [www.onlyfastcode.com](https://www.onlyfastcode.com)
+Check out the blog for more! [devmindscape.com](https://devmindscape.com)
 ---
